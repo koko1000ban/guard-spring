@@ -69,6 +69,10 @@ module Guard
       end
 
       def get_spring_cmd
+        if binstubs_path = bundle_binstubs_path
+          return "#{binstubs_path}/spring"
+        end
+
         return './bin/spring' if create_bin_stubs %w(rspec)
 
         UI.warning('Failed to create all required binstubs')
@@ -85,6 +89,16 @@ module Guard
 
       def bundler?
         @bundler ||= options[:bundler] != false && File.exist?("#{Dir.pwd}/Gemfile")
+      end
+
+      def bundle_binstub?
+        File.exist? "#{Dir.pwd}/.bundle/config"
+      end
+
+      def bundle_binstubs_path
+        if bundle_binstub?
+          IO.read("#{Dir.pwd}/.bundle/config").scan(/BUNDLE_BIN: (.*)$/).first.first
+        end
       end
 
       def test_unit?
